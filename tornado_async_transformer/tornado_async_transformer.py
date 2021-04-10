@@ -30,10 +30,20 @@ gen_test_coroutine_decorator = m.Decorator(
 coroutine_decorator_matcher = (
     gen_coroutine_decorator_matcher | gen_test_coroutine_decorator
 )
-coroutine_matcher = m.FunctionDef(
+gen_handler_methods_matcher = m.FunctionDef(name=m.OneOf(
+    m.Name('get_page'),
+    m.Name('post_page'),
+    m.Name('put_page'),
+    m.Name('delete_page')
+))
+coroutine_matcher = (m.FunctionDef(
     asynchronous=None,
-    decorators=[m.ZeroOrMore(), coroutine_decorator_matcher, m.ZeroOrMore()],
-)
+    decorators=[
+        m.ZeroOrMore(),
+        (coroutine_decorator_matcher | gen_handler_methods_matcher),
+        m.ZeroOrMore()
+    ],
+) | gen_handler_methods_matcher)
 
 
 class TransformError(Exception):
